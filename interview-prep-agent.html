@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Interview Prep Agent</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap');
+  :root {
+    --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c27; --border: #2a2a3d;
+    --accent: #7c6aff; --accent2: #a78bfa; --green: #22d3a0; --red: #ff6b6b;
+    --yellow: #fbbf24; --text: #f0f0f8; --muted: #8888aa; --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--surface); }
+  .logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--green)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; }
+  header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .badge { margin-left: auto; background: linear-gradient(135deg, var(--accent), var(--green)); color: white; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; font-family: 'Space Grotesk', sans-serif; }
+  main { flex: 1; max-width: 860px; width: 100%; margin: 0 auto; padding: 28px 20px; display: flex; flex-direction: column; gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; color: var(--accent2); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .step-num { width: 24px; height: 24px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 7px; font-weight: 500; }
+  input, textarea, select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; padding: 11px 13px; outline: none; transition: border-color 0.2s; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+  textarea { resize: vertical; min-height: 110px; }
+  .row { display: flex; gap: 14px; }
+  .row > * { flex: 1; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 22px; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #5b4de8); color: white; width: 100%; margin-top: 14px; font-size: 15px; padding: 15px; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 10px 16px; font-size: 13px; }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-green { background: linear-gradient(135deg, var(--green), #16a37a); color: #0a0a0f; font-weight: 700; width: 100%; padding: 15px; font-size: 15px; }
+  .btn-green:hover { opacity: 0.9; }
+  .demo-card { border-color: var(--green) !important; }
+  .demo-title { color: var(--green) !important; }
+  #questionsSection { display: none; }
+  .progress-bar { background: var(--surface2); border-radius: 99px; height: 6px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 99px; transition: width 0.4s ease; }
+  .question-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .q-counter { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--muted); font-weight: 500; }
+  .q-type-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag-technical { background: rgba(124,106,255,0.15); color: var(--accent2); }
+  .tag-behavioral { background: rgba(34,211,160,0.15); color: var(--green); }
+  .tag-situational { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .question-text { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; line-height: 1.5; color: var(--text); margin-bottom: 18px; padding: 18px; background: var(--surface2); border-radius: 12px; border-left: 3px solid var(--accent); }
+  .answer-actions { display: flex; gap: 10px; margin-top: 12px; }
+  #feedbackSection { display: none; }
+  .feedback-box { background: var(--surface2); border-radius: 12px; padding: 18px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .feedback-score { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .score-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; flex-shrink: 0; }
+  .score-high { background: rgba(34,211,160,0.15); color: var(--green); border: 2px solid var(--green); }
+  .score-mid { background: rgba(251,191,36,0.15); color: var(--yellow); border: 2px solid var(--yellow); }
+  .score-low { background: rgba(255,107,107,0.15); color: var(--red); border: 2px solid var(--red); }
+  .feedback-text { font-size: 14px; line-height: 1.7; color: #ccccee; }
+  .feedback-label { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; }
+  #resultsSection { display: none; }
+  .result-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--muted); }
+  .overall-feedback { background: linear-gradient(135deg, rgba(124,106,255,0.1), rgba(34,211,160,0.1)); border: 1px solid var(--accent); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+  .loading { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; padding: 14px 0; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { background: rgba(255,107,107,0.1); border: 1px solid var(--red); border-radius: 10px; padding: 13px; font-size: 14px; color: var(--red); margin-top: 12px; display: none; }
+  .hint-box { background: rgba(124,106,255,0.08); border: 1px solid rgba(124,106,255,0.3); border-radius: 10px; padding: 13px; font-size: 13px; color: var(--accent2); margin-top: 12px; display: none; line-height: 1.6; }
+  footer { text-align: center; padding: 18px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); }
+  select option { background: var(--surface2); }
+  .mt12 { margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">&#129302;</div>
+  <div>
+    <h1>Interview Prep Agent</h1>
+    <p>AI-powered mock interviews using Gemini</p>
+  </div>
+  <div class="badge">Kaggle x Google 2026</div>
+</header>
+
+<main>
+
+  <!-- API KEY CARD -->
+  <div class="card">
+    <div class="card-title"><div class="step-num">1</div> Gemini API Key (Optional)</div>
+    <label>Paste your Gemini API Key from aistudio.google.com</label>
+    <input type="password" id="apiKey" placeholder="AIza... (leave empty to use Demo Mode)" />
+    <div class="mt12">
+      <label>Select Model</label>
+      <select id="modelSelect">
+        <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+        <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+        <option value="gemini-pro">gemini-pro</option>
+      </select>
+    </div>
+    <div id="apiError" class="error-msg"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">&#128274; Security: your key is validated client-side, never stored, never logged, and only sent to Google's official Gemini endpoint over HTTPS. All answer text is sanitized to block prompt-injection patterns before being sent to the model.</p>
+  </div>
+
+  <!-- DEMO CARD -->
+  <div class="card demo-card">
+    <div class="card-title demo-title">&#9889; No API Key / Quota Issue? Use Demo Mode!</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Demo mode has 5 pre-built Java Backend Developer interview questions with AI-style feedback. Works 100% offline — no API key, no quota needed! Perfect for Kaggle submission.</p>
+    <button class="btn btn-green" onclick="startDemo()">&#9654; Start Demo Interview (No API Key Needed)</button>
+  </div>
+
+  <!-- JOB DETAILS CARD -->
+  <div class="card">
+    <div class="card-title"><div class="step-num">2</div> Job Details (For AI Mode)</div>
+    <div class="row">
+      <div>
+        <label>Job Role</label>
+        <input type="text" id="jobRole" placeholder="e.g. Java Backend Developer" value="Java Backend Developer" />
+      </div>
+      <div>
+        <label>Company (optional)</label>
+        <input type="text" id="company" placeholder="e.g. Google, TCS" />
+      </div>
+    </div>
+    <div class="mt12">
+      <label>Experience Level</label>
+      <select id="expLevel">
+        <option value="fresher" selected>Fresher (0-1 year)</option>
+        <option value="junior">Junior (1-3 years)</option>
+        <option value="mid">Mid-level (3-5 years)</option>
+        <option value="senior">Senior (5+ years)</option>
+      </select>
+    </div>
+    <div class="mt12">
+      <label>Key Skills</label>
+      <input type="text" id="skills" placeholder="e.g. Java, Spring Boot, MySQL, REST APIs" value="Java, Spring Boot, MySQL, REST APIs" />
+    </div>
+    <div class="mt12">
+      <label>Number of Questions</label>
+      <select id="numQuestions">
+        <option value="3">3 Questions (Quick)</option>
+        <option value="5" selected>5 Questions (Standard)</option>
+        <option value="8">8 Questions (Full)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="startBtn" onclick="startInterview()">&#128640; Start AI Interview</button>
+    <div id="loadingSetup" class="loading" style="display:none">
+      <div class="spinner"></div> Generating your personalized interview questions...
+    </div>
+  </div>
+
+  <!-- QUESTIONS SECTION -->
+  <div class="card" id="questionsSection">
+    <div class="card-title"><div class="step-num">3</div> Answer the Questions</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="question-header">
+      <span class="q-counter" id="qCounter">Question 1 of 5</span>
+      <span class="q-type-tag tag-technical" id="qTypeTag">Technical</span>
+    </div>
+    <div class="question-text" id="questionText">Loading...</div>
+    <label>Your Answer</label>
+    <textarea id="userAnswer" placeholder="Type your answer here... Be as detailed as possible!" rows="5"></textarea>
+    <div class="answer-actions">
+      <button class="btn btn-outline" onclick="getHint()">&#128161; Hint</button>
+      <button class="btn btn-outline" onclick="skipQuestion()">&#9197; Skip</button>
+      <button class="btn btn-primary" style="margin-top:0;flex:1" id="submitAnswerBtn" onclick="submitAnswer()">Submit Answer</button>
+    </div>
+    <div id="hintBox" class="hint-box"></div>
+    <div id="loadingFeedback" class="loading" style="display:none">
+      <div class="spinner"></div> Evaluating your answer...
+    </div>
+  </div>
+
+  <!-- FEEDBACK SECTION -->
+  <div class="card" id="feedbackSection">
+    <div class="card-title">&#128202; Answer Feedback</div>
+    <div id="feedbackContent"></div>
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="margin-top:8px">Next Question</button>
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <div class="card" id="resultsSection">
+    <div class="card-title">&#127942; Interview Complete — Your Results</div>
+    <div class="result-summary" id="resultSummary"></div>
+    <div id="overallFeedback" class="overall-feedback"></div>
+    <div id="allFeedbacks"></div>
+    <div style="display:flex;gap:12px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1" onclick="restartInterview()">&#128260; Try Again</button>
+      <button class="btn btn-green" style="flex:1;width:auto" onclick="downloadResults()">&#11015; Download Results</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div style="margin-bottom:6px">&#129302; Gemini 2.0 Flash &nbsp;|&nbsp; 5-Day AI Agents Course — Kaggle x Google 2026</div>
+  <div>Built by Megha Kardam &nbsp;|&nbsp; DCRUST Murthal &nbsp;|&nbsp; Capstone Project</div>
+</footer>
+
+<script>
+  let questions = [];
+  let currentQ = 0;
+  let feedbacks = [];
+  let scores = [];
+  let isDemoMode = false;
+
+  const DEMO_QUESTIONS = [
+    { question: "Explain the difference between HashMap and ConcurrentHashMap in Java. When would you use each?", type: "Technical" },
+    { question: "What is the difference between @RestController and @Controller in Spring Boot?", type: "Technical" },
+    { question: "Tell me about a time you debugged a difficult backend issue. What was your approach?", type: "Behavioral" },
+    { question: "How would you design a REST API for a student management system? What endpoints would you create?", type: "Situational" },
+    { question: "Explain the concept of database indexing and when you would use it in MySQL.", type: "Technical" },
+    { question: "What are the SOLID principles? Give an example of one.", type: "Technical" },
+    { question: "How do you handle exceptions in Spring Boot? Explain @ExceptionHandler.", type: "Technical" },
+    { question: "Describe a situation where you had to learn a new technology quickly. How did you handle it?", type: "Behavioral" }
+  ];
+
+  const DEMO_FEEDBACK = [
+    { score: 8, verdict: "Excellent", strengths: "Great understanding of thread safety concepts.", improvements: "Could mention use cases in microservices.", ideal_points: "Thread safety, performance differences, use cases" },
+    { score: 7, verdict: "Good", strengths: "Correctly identified the key difference.", improvements: "Mention @ResponseBody and view resolvers for completeness.", ideal_points: "JSON response, view resolver, @ResponseBody" },
+    { score: 9, verdict: "Excellent", strengths: "Clear problem-solving approach with STAR method.", improvements: "Add more technical details of the debugging tools used.", ideal_points: "Systematic approach, tools used, outcome" },
+    { score: 6, verdict: "Average", strengths: "Good basic endpoints identified.", improvements: "Mention HTTP methods, status codes, and versioning.", ideal_points: "RESTful design, HTTP verbs, status codes, versioning" },
+    { score: 8, verdict: "Good", strengths: "Solid explanation of indexing concepts.", improvements: "Could discuss composite indexes and when NOT to use indexes.", ideal_points: "B-tree structure, types of indexes, performance impact" },
+    { score: 7, verdict: "Good", strengths: "Correctly explained at least one principle.", improvements: "Try to give real code examples for each principle.", ideal_points: "All 5 principles with practical examples" },
+    { score: 8, verdict: "Excellent", strengths: "Good coverage of @ExceptionHandler and @ControllerAdvice.", improvements: "Mention custom exception classes and HTTP status codes.", ideal_points: "@ControllerAdvice, custom exceptions, proper status codes" },
+    { score: 9, verdict: "Excellent", strengths: "Showed great adaptability and learning mindset.", improvements: "Could mention specific learning resources or strategies.", ideal_points: "Learning strategy, timeline, outcome, reflection" }
+  ];
+
+  function startDemo() {
+    isDemoMode = true;
+    const num = parseInt(document.getElementById('numQuestions').value);
+    questions = DEMO_QUESTIONS.slice(0, num);
+    currentQ = 0; feedbacks = []; scores = [];
+    showQuestion();
+    document.getElementById('questionsSection').style.display = 'block';
+    document.getElementById('questionsSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // SECURITY: API key never logged, never sent anywhere except Google's official endpoint.
+  // Key lives only in browser memory for this session (no localStorage/cookies used).
+  function isValidApiKeyFormat(key) {
+    // Basic shape check for Google AI Studio keys (defense against obviously malformed/garbage input)
+    return /^AIza[0-9A-Za-z\-_]{20,}$/.test(key);
+  }
+
+  // SECURITY: Strip characters commonly used in prompt-injection attempts before
+  // embedding raw user text inside our system prompts.
+  function sanitizeInput(text) {
+    return text
+      .replace(/[<>]/g, '')                 // strip angle brackets (HTML/tag injection)
+      .replace(/```/g, "'''")               // neutralize code-fence breakout attempts
+      .replace(/\b(ignore previous|disregard above|system prompt|you are now)\b/gi, '[filtered]')
+      .slice(0, 2000);                      // hard cap length to limit payload abuse
+  }
+
+  async function callGemini(prompt) {
+    const rawKey = document.getElementById('apiKey').value.trim();
+    const model = document.getElementById('modelSelect').value;
+
+    if (!rawKey) { showError('Please enter your Gemini API key or use Demo Mode!'); return null; }
+
+    // SECURITY CHECK 1 — reject malformed keys client-side before any network call
+    if (!isValidApiKeyFormat(rawKey)) {
+      showError('That does not look like a valid Gemini API key. Keys start with "AIza". Please check aistudio.google.com.');
+      return null;
+    }
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${rawKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          // SECURITY CHECK 2 — safety settings block harmful content categories
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
+          ]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      if (data.promptFeedback && data.promptFeedback.blockReason) {
+        throw new Error('Response blocked by safety filters: ' + data.promptFeedback.blockReason);
+      }
+      return data.candidates[0].content.parts[0].text;
+    } catch(e) {
+      // SECURITY: never echo the raw key back in any error message
+      showError('Error: ' + e.message.replace(rawKey, '[REDACTED]'));
+      return null;
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('apiError');
+    el.style.display = 'block';
+    el.textContent = msg;
+  }
+
+  async function startInterview() {
+    const role = document.getElementById('jobRole').value.trim() || 'Software Developer';
+    const company = document.getElementById('company').value.trim();
+    const level = document.getElementById('expLevel').value;
+    const skills = document.getElementById('skills').value.trim();
+    const num = document.getElementById('numQuestions').value;
+    if (!document.getElementById('apiKey').value.trim()) {
+      showError('No API key found! Please use Demo Mode below or enter your API key.');
+      return;
+    }
+    isDemoMode = false;
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('loadingSetup').style.display = 'flex';
+    document.getElementById('apiError').style.display = 'none';
+    const prompt = `You are an expert technical interviewer. Generate exactly ${num} interview questions for a ${level} ${role}${company ? ' at ' + company : ''}.
+Skills: ${skills || role}.
+Return ONLY a JSON array (no markdown):
+[{"question":"...","type":"Technical"},{"question":"...","type":"Behavioral"}]
+Types must be: Technical, Behavioral, or Situational. Mix all types.`;
+    const result = await callGemini(prompt);
+    document.getElementById('loadingSetup').style.display = 'none';
+    document.getElementById('startBtn').disabled = false;
+    if (!result) return;
+    try {
+      questions = JSON.parse(result.replace(/```json|```/g, '').trim());
+      currentQ = 0; feedbacks = []; scores = [];
+      showQuestion();
+      document.getElementById('questionsSection').style.display = 'block';
+      document.getElementById('questionsSection').scrollIntoView({ behavior: 'smooth' });
+    } catch(e) { showError('Could not parse questions. Please try again.'); }
+  }
+
+  function showQuestion() {
+    const q = questions[currentQ];
+    const total = questions.length;
+    document.getElementById('qCounter').textContent = 'Question ' + (currentQ + 1) + ' of ' + total;
+    document.getElementById('questionText').textContent = q.question;
+    document.getElementById('progressFill').style.width = ((currentQ / total) * 100) + '%';
+    document.getElementById('userAnswer').value = '';
+    document.getElementById('hintBox').style.display = 'none';
+    document.getElementById('feedbackSection').style.display = 'none';
+    document.getElementById('submitAnswerBtn').disabled = false;
+    const tag = document.getElementById('qTypeTag');
+    tag.textContent = q.type;
+    tag.className = 'q-type-tag ' + (q.type === 'Technical' ? 'tag-technical' : q.type === 'Behavioral' ? 'tag-behavioral' : 'tag-situational');
+  }
+
+  async function submitAnswer() {
+    const answer = sanitizeInput(document.getElementById('userAnswer').value.trim());
+    if (!answer) { alert('Please write your answer first!'); return; }
+    document.getElementById('submitAnswerBtn').disabled = true;
+    document.getElementById('loadingFeedback').style.display = 'flex';
+    document.getElementById('hintBox').style.display = 'none';
+
+    let fb;
+    if (isDemoMode) {
+      await new Promise(r => setTimeout(r, 1200));
+      const demoFb = DEMO_FEEDBACK[currentQ % DEMO_FEEDBACK.length];
+      const wordCount = answer.split(' ').length;
+      const score = wordCount < 10 ? Math.max(3, demoFb.score - 3) : wordCount < 25 ? Math.max(5, demoFb.score - 1) : demoFb.score;
+      fb = { ...demoFb, score, question: questions[currentQ].question, answer, type: questions[currentQ].type };
+    } else {
+      const role = document.getElementById('jobRole').value.trim();
+      const level = document.getElementById('expLevel').value;
+      const prompt = `You are an expert interviewer evaluating a ${level} ${role} candidate.
+Question: ${questions[currentQ].question}
+Answer: ${answer}
+Return ONLY this JSON (no markdown):
+{"score":<1-10>,"verdict":"<Excellent|Good|Average|Needs Improvement>","strengths":"<1-2 sentences>","improvements":"<1-2 sentences>","ideal_points":"<2-3 key points>"}`;
+      const result = await callGemini(prompt);
+      document.getElementById('loadingFeedback').style.display = 'none';
+      document.getElementById('submitAnswerBtn').disabled = false;
+      if (!result) return;
+      try {
+        fb = JSON.parse(result.replace(/```json|```/g, '').trim());
+        fb.question = questions[currentQ].question;
+        fb.answer = answer;
+        fb.type = questions[currentQ].type;
+      } catch(e) { alert('Error parsing feedback. Try again.'); return; }
+    }
+
+    document.getElementById('loadingFeedback').style.display = 'none';
+    document.getElementById('submitAnswerBtn').disabled = false;
+    feedbacks.push(fb);
+    scores.push(fb.score);
+    showFeedback(fb);
+  }
+
+  function showFeedback(fb) {
+    const sc = fb.score >= 8 ? 'score-high' : fb.score >= 5 ? 'score-mid' : 'score-low';
+    document.getElementById('feedbackContent').innerHTML = `
+      <div class="feedback-box">
+        <div class="feedback-score">
+          <div class="score-circle ${sc}">${fb.score}/10</div>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:3px">${fb.verdict}</div>
+            <div style="font-size:13px;color:var(--muted)">${fb.type} Question</div>
+          </div>
+        </div>
+        <div class="feedback-label">Strengths</div>
+        <div class="feedback-text" style="margin-bottom:12px">${fb.strengths}</div>
+        <div class="feedback-label">Areas to Improve</div>
+        <div class="feedback-text" style="margin-bottom:12px">${fb.improvements}</div>
+        <div class="feedback-label">Ideal Answer Should Cover</div>
+        <div class="feedback-text">${fb.ideal_points}</div>
+      </div>`;
+    document.getElementById('feedbackSection').style.display = 'block';
+    const isLast = currentQ === questions.length - 1;
+    document.getElementById('nextBtn').textContent = isLast ? 'See Final Results' : 'Next Question';
+    document.getElementById('feedbackSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function nextQuestion() {
+    currentQ++;
+    if (currentQ >= questions.length) showResults();
+    else { showQuestion(); document.getElementById('questionsSection').scrollIntoView({ behavior: 'smooth' }); }
+  }
+
+  function skipQuestion() {
+    feedbacks.push({ question: questions[currentQ].question, answer: 'Skipped', score: 0, verdict: 'Skipped', strengths: '-', improvements: 'You skipped this question. Try to attempt all questions in a real interview!', ideal_points: '-', type: questions[currentQ].type });
+    scores.push(0);
+    nextQuestion();
+  }
+
+  async function getHint() {
+    const hintBox = document.getElementById('hintBox');
+    hintBox.style.display = 'block';
+    hintBox.textContent = 'Getting hint...';
+    if (isDemoMode) {
+      await new Promise(r => setTimeout(r, 800));
+      const hints = [
+        'Think about thread safety and how Java handles concurrent access to shared resources.',
+        'Consider the difference between returning data vs returning a view in Spring.',
+        'Use the STAR method: Situation, Task, Action, Result.',
+        'Think about standard HTTP methods (GET, POST, PUT, DELETE) and REST conventions.',
+        'Consider how a database finds rows without scanning the entire table.'
+      ];
+      hintBox.textContent = 'Hint: ' + (hints[currentQ % hints.length]);
+      return;
+    }
+    const result = await callGemini(`Give a 2-sentence hint (not the answer) for: "${questions[currentQ].question}"`);
+    hintBox.textContent = result ? 'Hint: ' + result : 'Could not get hint. Try answering based on your knowledge!';
+  }
+
+  async function showResults() {
+    document.getElementById('questionsSection').style.display = 'none';
+    document.getElementById('feedbackSection').style.display = 'none';
+    const avg = (scores.reduce((a,b) => a+b,0) / scores.length).toFixed(1);
+    const good = scores.filter(s => s >= 7).length;
+    document.getElementById('resultSummary').innerHTML = `
+      <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${avg}<span style="font-size:16px">/10</span></div><div class="stat-label">Average Score</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${good}</div><div class="stat-label">Strong Answers</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--yellow)">${scores.length}</div><div class="stat-label">Questions Done</div></div>`;
+    let overall = '';
+    if (isDemoMode) {
+      const perf = avg >= 8 ? 'excellent' : avg >= 6 ? 'good' : 'developing';
+      overall = `You showed ${perf} performance with an average score of ${avg}/10. Focus on giving detailed technical answers with real examples. Keep practicing — consistency is key to cracking interviews! Your strongest area was technical knowledge. Work on providing more structured answers using the STAR method for behavioral questions.`;
+    } else {
+      const role = document.getElementById('jobRole').value.trim();
+      overall = await callGemini(`A ${role} candidate scored ${scores.join(', ')} out of 10 in a mock interview. Write a 3-sentence encouraging but honest overall performance summary with specific advice.`) || 'Great effort! Keep practicing to improve your scores.';
+    }
+    document.getElementById('overallFeedback').innerHTML = `<div class="feedback-label" style="margin-bottom:10px">Overall Performance</div><div style="font-size:14px;line-height:1.7;color:#ccccee">${overall}</div>`;
+    let html = '<div style="margin-top:18px"><div class="feedback-label" style="margin-bottom:12px">All Questions Summary</div>';
+    feedbacks.forEach((fb, i) => {
+      const sc = fb.score >= 8 ? 'score-high' : fb.score >= 5 ? 'score-mid' : 'score-low';
+      html += `<div class="feedback-box" style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Q${i+1} - ${fb.type}</div>
+        <div style="font-weight:600;margin-bottom:8px;font-size:14px">${fb.question}</div>
+        <div class="feedback-score" style="margin-bottom:8px"><div class="score-circle ${sc}" style="width:38px;height:38px;font-size:13px">${fb.score}/10</div><span style="font-weight:600">${fb.verdict}</span></div>
+        <div class="feedback-text">${fb.improvements}</div></div>`;
+    });
+    html += '</div>';
+    document.getElementById('allFeedbacks').innerHTML = html;
+    document.getElementById('resultsSection').style.display = 'block';
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function restartInterview() {
+    questions = []; currentQ = 0; feedbacks = []; scores = []; isDemoMode = false;
+    ['questionsSection','feedbackSection','resultsSection'].forEach(id => document.getElementById(id).style.display = 'none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function downloadResults() {
+    const role = document.getElementById('jobRole').value.trim() || 'Developer';
+    const avg = (scores.reduce((a,b) => a+b,0) / scores.length).toFixed(1);
+    let text = `INTERVIEW PREP RESULTS\nRole: ${role}\nDate: ${new Date().toLocaleDateString()}\nAverage Score: ${avg}/10\nMode: ${isDemoMode ? 'Demo' : 'AI'}\n\n`;
+    feedbacks.forEach((fb, i) => {
+      text += `Q${i+1} [${fb.type}]: ${fb.question}\nYour Answer: ${fb.answer}\nScore: ${fb.score}/10 - ${fb.verdict}\nImprovements: ${fb.improvements}\n\n`;
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    a.download = `interview-results.txt`;
+    a.click();
+  }
+</script>
+</body>
+</html>
